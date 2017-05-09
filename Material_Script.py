@@ -174,7 +174,7 @@ def main():
     '产品类别','项目号','BU','中文品名','性能及功能描述',\
     '是否进关','是否定制件','应用及领域','尺寸','应用领域',\
     '最惠国税率','普通关税','进关品名','监管条件','HS  CODE',\
-    '净重（千克/颗）']
+    '净重（千克/颗）','一层包装','12nc']
 
     rawinputList = [[] for x in headList]
     outputList1 = [[] for x in range(25)]
@@ -197,10 +197,11 @@ def main():
     for x in range(len(rawinputList)):
         if (rawinputList[x] == []):
             continue
-        if (rawinputList[x][0] == 'MPQ') or (rawinputList[x][0] == 'MOQ') or (rawinputList[x][0] == 'L/T（天）'):
+        if (rawinputList[x][0] == 'MPQ') or (rawinputList[x][0] == 'MOQ') or \
+        (rawinputList[x][0] == 'L/T（天）') or (rawinputList[x][0] == '一层包装'):
             myFloatToInt(rawinputList[x])
         elif(rawinputList[x][0] == '项目号') or (rawinputList[x][0] == '最惠国税率') or (rawinputList[x][0] == '普通关税')\
-         or (rawinputList[x][0] == 'HS  CODE') or (rawinputList[x][0] == '净重（千克/颗）'):
+         or (rawinputList[x][0] == 'HS  CODE') or (rawinputList[x][0] == '净重（千克/颗）') or (rawinputList[x][0] == '12nc'):
             continue
         else:
             myTrim(rawinputList[x])
@@ -212,6 +213,10 @@ def main():
     outputList1[4] = rawinputList[5][1:]
     outputList1[5] = rawinputList[6][1:]
     outputList1[6] = rawinputList[7][1:]
+    #一层包装
+    outputList2[29] = rawinputList[27][1:]
+    #12n
+    outputList2[9] = rawinputList[28][1:]
     #品牌
     outputList1[9] = rawinputList[10][1:]
 #检测品牌是否第一次出现
