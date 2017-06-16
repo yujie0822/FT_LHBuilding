@@ -3,6 +3,7 @@ import xlrd
 import xlsxwriter
 import sys
 import datetime
+import time
 stdout = sys.stdout
 stdin = sys.stdin
 stderr = sys.stderr
@@ -178,7 +179,7 @@ def main():
 
     rawinputList = [[] for x in headList]
     outputList1 = [[] for x in range(25)]
-    outputList2 = [[] for x in range(39)]
+    outputList2 = [[] for x in range(49)]
 
 
     inputCol = 0
@@ -195,13 +196,20 @@ def main():
             print "{}列未录入".format(temp[0])
 
     for x in range(len(rawinputList)):
+        if x in [2,3,9,12,13,19,25,26,28]:
+            continue
+        if (len(rawinputList[x]) == 0):
+            print "无--"+headList[x]+"--列"
+
+
+    for x in range(len(rawinputList)):
         if (rawinputList[x] == []):
             continue
         if (rawinputList[x][0] == 'MPQ') or (rawinputList[x][0] == 'MOQ') or \
         (rawinputList[x][0] == 'L/T（天）') or (rawinputList[x][0] == '一层包装'):
             myFloatToInt(rawinputList[x])
         elif(rawinputList[x][0] == '项目号') or (rawinputList[x][0] == '最惠国税率') or (rawinputList[x][0] == '普通关税')\
-         or (rawinputList[x][0] == 'HS  CODE') or (rawinputList[x][0] == '净重（千克/颗）') or (rawinputList[x][0] == '12nc'):
+         or (rawinputList[x][0].find('HS') != -1) or (rawinputList[x][0] == '净重（千克/颗）') or (rawinputList[x][0] == '12nc'):
             continue
         else:
             myTrim(rawinputList[x])
@@ -215,6 +223,9 @@ def main():
     outputList1[6] = rawinputList[7][1:]
     #一层包装
     outputList2[29] = rawinputList[27][1:]
+    for x in range(len(outputList2[29])):
+        if outputList2[29][x]  == '':
+            print "行{}一层包装为空".format(x+2)
     #12n
     outputList2[9] = rawinputList[28][1:]
     #品牌
@@ -232,7 +243,14 @@ def main():
     #进关品名
     outputList1[15] = rawinputList[23][1:]
     #重量
-    outputList1[16] = [1000000000*x for x in rawinputList[26][1:]]
+    outputList1[16] = ["" for x in rawinputList[26][1:]]
+    for x in range(len(rawinputList[26][1:])):
+        if(type(rawinputList[26][x+1]) == float):
+            outputList1[16][x]=1000000000*rawinputList[26][x+1]
+        else:
+            if(rawinputList[26][x+1].encode('utf-8').strip()!=""):
+                print "行{}净重异常".format(x+2)
+
     #HSCODE
     outputList2[32] = rawinputList[25][1:]
     #长物料
@@ -443,17 +461,26 @@ def main():
             outputList2[7] += [x]
 
 #项目号
-    rawinputList[12] = rawinputList[12][1:]
-    for x in range(len(outputList1[2])):
-        if x > len(rawinputList[12]):
-            outputList2[26] += [000000]
-        elif rawinputList[12][x] == ('') or rawinputList[12][x] == (u''):
-            outputList2[26] += ['000000']
-        else:
-            outputList2[26] += [rawinputList[12][x]]
+    if len(rawinputList[12]) == 0:
+        outputList2[26] = ['000000' for x in outputList1[2]]
+    else:
+        rawinputList[12] = rawinputList[12][1:]
+        for x in range(len(outputList1[2])):
+            if x > len(rawinputList[12]):
+                outputList2[26] += ['000000']
+            elif rawinputList[12][x] == ('') or rawinputList[12][x] == (u''):
+                outputList2[26] += ['000000']
+            else:
+                outputList2[26] += [rawinputList[12][x]]
+
+#创建日期
+    dayStr = now.strftime('%Y-%m-%d')
+    outputList2[48] = [dayStr for x in outputList1[2]]
+
 
     outputList1[1] = outputList1[0]
     outputList2[1] = outputList1[2]
+
 
     workbook = xlsxwriter.Workbook(outputPath)
     worksheet = workbook.add_worksheet('上传')
